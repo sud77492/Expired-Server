@@ -1,0 +1,166 @@
+Commands for mongodb
+
+show dbs
+use (whichever we want)
+use collections (whichever we want)
+db.collection.find().pretty();
+
+db.expires.find().sort({"expiry": -1}).limit(5).pretty()
+
+db.expires.remove({})
+
+//between two dates
+db.expires.find({expiry: {$gte:"2020-11-23T06:05:19.785Z",$lt: "2020-11-27T06:05:19.785Z"}}).pretty()
+
+db.expires.find({expiry: {$gte:"2020-11-23T06:05:19.785Z",$lt: new Date()}}).pretty()
+
+db.expires.aggregate(
+    [{
+       $match: {
+          expiry: {
+             $gte: "2020-11-23T06:05:19.785Z",
+             $lte: new Date().toISOString()
+            }
+        }
+    }, {
+ $group: {
+    _id: 1,
+    COUNT: {
+       $sum: 1
+    }
+ }
+ }]
+);
+
+db.expires.aggregate(
+    [{
+       $match: {
+          expiry: {
+             $gte: "2020-11-23T06:05:19.785Z",
+             $lte: new Date().toISOString()
+            }
+        }
+    }, 
+    {
+     $project:
+      {
+         _id: 1
+      }
+   },
+    {
+ $group: {
+    _id: null,
+    COUNT: {
+       $sum: 1
+    }
+ }
+ }]
+);
+
+
+db.expires.aggregate(
+    [{
+       $match: {
+          expiry: {
+             $gte: "2020-11-23T06:05:19.785Z",
+             $lte: "2020-11-27T06:05:19.785Z"
+            }
+      }
+          }, {
+ $group: {
+    _id: null,
+    COUNT: {
+       $sum: 1
+    }
+ }
+ }]
+  );
+
+
+db.expires.aggregate([
+   {
+     $project:
+      {
+         _id: 1
+         
+      }
+   }
+])
+
+db.expires.aggregate([
+	{
+       $match: {
+          expiry: {
+             $gte: "2020-11-23T06:05:19.785Z",
+             $lte: "2020-11-27T06:05:19.785Z"
+            }
+      }
+          },
+   {
+     $project:
+      {
+        _id: 1,
+        name: 1
+      }
+   }
+])
+
+
+db.expires.aggregate([
+  /** Filter out docs */
+  { $match: { photo: "https://randomuser.me/api/portraits/women/44.jpg" } },
+  /** subtract two dates gets timestamp & divide to convert to days & round value */
+  {
+    $addFields: {
+      daysCount: {
+        $round: { $divide: [{ $subtract: [ISODate("2020-11-08T08:46:02.552Z"), "$date"] }, 86400000] }
+      }
+    }
+  }
+]).pretty();
+
+db.expires.aggregate([
+  /** Filter out docs */
+  { $match: { photo: "https://randomuser.me/api/portraits/women/44.jpg" } },
+  /** subtract two dates gets timestamp & divide to convert to days & round value */
+  {
+    $addFields: {
+      daysCount: {
+        $round: { $divide: [{ $subtract: ["$expiry", "$date"] }, 86400000] }
+      }
+    }
+  }
+]).pretty();
+
+db.expires.aggregate([
+    { "$redact": {
+        "$cond": {
+            "if": {
+                "$gt": [
+                    { "$subtract": [ ISODate($expiry), "$date" ] },
+                    1000 * 60 * 60 * 24
+                ]
+            },
+            "then": "$$KEEP",
+            "else": "$$PRUNE"
+        }
+    }}
+])
+
+
+
+db.expires.aggregate([
+      {
+        "$project": {            
+          "date_diff": { "$subtract": [ISODate("2020-11-05T08:46:02.552Z"), ISODate("2020-11-29T08:46:02.552Z")] }
+        }
+      },
+      {
+        "$project": {             
+          "days": { "$divide": ["$date_diff", 1000 * 60 * 60 * 24] }
+        }
+      }
+    ]);
+
+
+    db.expires.aggregate([   /** Filter out docs */   { $match: { photo: "https://randomuser.me/api/portraits/women/44.jpg" } },   /** subtract two dates gets timestamp & divide to convert to days & round value */   {     $addFields: {       daysCount: {         $round: { $divide: [{ $subtract: [ISODate("2020-11-05T08:46:02.552Z"), "$date"] }, 86400000] }       }     }   } ]);
