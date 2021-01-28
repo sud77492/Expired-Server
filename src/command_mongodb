@@ -3,6 +3,13 @@ Commands for mongodb
 show dbs
 use (whichever we want)
 use collections (whichever we want)
+
+db.category.insertOne(
+   { "name" : "Accessories"
+   }
+)
+
+
 db.collection.find().pretty();
 
 db.expires.find().sort({"expiry": -1}).limit(5).pretty()
@@ -161,6 +168,24 @@ db.expires.aggregate([
         }
       }
     ]);
+
+db.expires.aggregate([
+    { $match: { photo: "https://randomuser.me/api/portraits/women/44.jpg" } },
+    {
+      $addFields: {
+        daysCount: {
+          $round: {
+            $divide: [
+              {
+                $subtract: [ISODate("2020-12-16T08:32:06.993Z"), new Date()],
+              },
+              86400000,
+            ],
+          },
+        },
+      },
+    },
+]).pretty();
 
 
     db.expires.aggregate([   /** Filter out docs */   { $match: { photo: "https://randomuser.me/api/portraits/women/44.jpg" } },   /** subtract two dates gets timestamp & divide to convert to days & round value */   {     $addFields: {       daysCount: {         $round: { $divide: [{ $subtract: [ISODate("2020-11-05T08:46:02.552Z"), "$date"] }, 86400000] }       }     }   } ]);

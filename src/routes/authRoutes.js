@@ -18,6 +18,28 @@ router.post("/signup", async (req, res) => {
   }
 });
 
+router.put("/update_user/:email", async (req, res) => {
+  try {
+    const update_user = await User.update(
+      { email: req.params.email },
+      {
+        $set: {
+          expoToken: req.body.expoToken,
+        },
+      },
+      (err, result) => {
+        if (err) {
+          throw err;
+        }
+        res.send("user updated sucessfully");
+      }
+    );
+    //res.send(update_expire);
+  } catch (err) {
+    res.status(422).send({ error: err.message });
+  }
+});
+
 router.post("/signin", async (req, res) => {
   const { email, password } = req.body;
   if (!email || !password) {
@@ -34,6 +56,12 @@ router.post("/signin", async (req, res) => {
   } catch (err) {
     return res.status(422).send({ error: "Invalid password or email" });
   }
+});
+
+router.get("/users", async (req, res) => {
+  const users = await User.find();
+
+  res.send(users);
 });
 
 module.exports = router;

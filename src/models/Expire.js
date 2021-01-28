@@ -30,7 +30,7 @@ const expireSchema = new mongoose.Schema({
   // },
   expiry: {
     type: Date,
-    default: "",
+    default: Date.now,
   },
   photo: {
     type: String,

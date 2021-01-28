@@ -11,6 +11,10 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  expoToken: {
+    type: String,
+    default: "",
+  },
 });
 
 userSchema.pre("save", function (next) {
